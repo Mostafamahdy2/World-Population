@@ -1,0 +1,111 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+        crossorigin=""></script>
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+        <img src="https://urbandatalab.pt/images/partners/nova_ims.png" width="50" 
+        height="50" />
+    </head>
+             
+             <style>
+             body{
+                background-color: rgb(0, 0, 0);
+                overflow-y: hidden;
+                overflow-x: hidden;
+            }
+
+
+
+            .my-table {
+  border-collapse: collapse;
+  border: 1px solid #494040;
+  background-color: #8b8181;
+}
+.my-table th, .my-table td {
+  padding: 8px;
+  text-align: left;
+}
+.my-table th {
+  background-color: #4CAF50;
+  color: white;
+}
+.my-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.my-table tr:hover {
+  background-color: #ddd;
+}
+        </style>
+    <body>
+        <h1 style="color:rgb(255, 255, 255);font-size:18px;text-align: center;margin-top: -25px;font-weight: bold;text-transform: uppercase;font-style: italic;text-align: center;background: linear-gradient(to right, #f5f3ef, #72cf07);text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);border-bottom: 1px solid #333;
+        ">World PoPulation</h1> 
+        
+        <label for="search" style="color: rgb(236, 236, 236);" style="size: 10cqmax;margin-top: -20px;" >Search by country:</label>
+        <input type="text" id="search" style="color: rgb(2, 23, 41);">
+        <button id="searchBtn" style="color: #494040;" style="size: 6cqmax;">Search</button>
+
+
+        </div>
+        <div id="map" style="height: 500px"></div>
+        <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+        }).addTo(map);
+
+         $("#search").keyup(function(event) {
+             if (event.keyCode === 13) {
+              $("#13").click();
+               }
+              });
+
+        $(document).ready(function(){
+            $('#searchBtn').click(function() {
+				var searchValue = $('#search').val();
+				$.ajax({
+					url: '/countries/' + searchValue,
+					type: 'GET',
+					success: function(result) {
+						// Handle the result of the request here
+                        country = new L.GeoJSON(result,{
+                            style: {
+                                "color": "#92EA0C",
+                                "weight": 10,
+                                "opacity": 0.30
+                            },
+                            onEachFeature:function(feature,layer){
+                                
+                            // Create a table element with two columns
+                            var table = $('<table>').addClass('my-table');;
+                            var tbody = $('<tbody>').appendTo(table);
+                            $.each(feature.properties, function(property, value) {
+                                var row = $('<tr>');
+                                $('<td>').text(property).appendTo(row);
+                                $('<td>').text(value).appendTo(row);
+                                tbody.append(row);
+                            });
+
+                                layer.bindPopup(
+                                    table[0]
+                                    );
+                            }}).addTo(map)
+                        map.fitBounds(country.getBounds())
+					},
+					error: function(error) {
+						// Handle errors here
+						console.error(error);
+					}
+				});
+			});
+        })
+        </script>
+
+    </body>
+</html>
